@@ -28,14 +28,14 @@ func TestComputeValidatorParticipation_PreviousEpoch(t *testing.T) {
 		balances[i] = params.BeaconConfig().MaxEffectiveBalance
 	}
 
-	blockRoots := make([][]byte, 256)
+	blockRoots := make([][32]byte, 256)
 	for i := 0; i < len(blockRoots); i++ {
 		slot := bytesutil.Bytes32(uint64(i))
-		blockRoots[i] = slot
+		blockRoots[i] = bytesutil.ToBytes32(slot)
 	}
 	target := &ethpb.Checkpoint{
 		Epoch: e,
-		Root:  blockRoots[0],
+		Root:  blockRoots[0][:],
 	}
 
 	atts := []*pb.PendingAttestation{
@@ -65,9 +65,9 @@ func TestComputeValidatorParticipation_PreviousEpoch(t *testing.T) {
 		Slot:                        e*params.BeaconConfig().SlotsPerEpoch + 1,
 		Validators:                  validators,
 		Balances:                    balances,
-		BlockRoots:                  blockRoots,
+		BlockRoots:                  bytesutil.ConvertToCustomType(blockRoots),
 		Slashings:                   []uint64{0, 1e9, 1e9},
-		RandaoMixes:                 make([][]byte, params.BeaconConfig().EpochsPerHistoricalVector),
+		RandaoMixes:                 bytesutil.ConvertToCustomType(make([][32]byte, params.BeaconConfig().SlotsPerHistoricalRoot)),
 		PreviousEpochAttestations:   atts,
 		FinalizedCheckpoint:         &ethpb.Checkpoint{},
 		JustificationBits:           bitfield.Bitvector4{0x00},
@@ -107,14 +107,14 @@ func TestComputeValidatorParticipation_CurrentEpoch(t *testing.T) {
 	}
 
 	slot := e*params.BeaconConfig().SlotsPerEpoch + 4
-	blockRoots := make([][]byte, 256)
+	blockRoots := make([][32]byte, 256)
 	for i := 0; i < len(blockRoots); i++ {
 		slot := bytesutil.Bytes32(uint64(i))
-		blockRoots[i] = slot
+		blockRoots[i] = bytesutil.ToBytes32(slot)
 	}
 	target := &ethpb.Checkpoint{
 		Epoch: e,
-		Root:  blockRoots[params.BeaconConfig().SlotsPerEpoch],
+		Root:  blockRoots[params.BeaconConfig().SlotsPerEpoch][:],
 	}
 
 	atts := []*pb.PendingAttestation{
@@ -140,9 +140,9 @@ func TestComputeValidatorParticipation_CurrentEpoch(t *testing.T) {
 		Slot:                       slot,
 		Validators:                 validators,
 		Balances:                   balances,
-		BlockRoots:                 blockRoots,
+		BlockRoots:                 bytesutil.ConvertToCustomType(blockRoots),
 		Slashings:                  []uint64{0, 1e9, 1e9},
-		RandaoMixes:                make([][]byte, params.BeaconConfig().EpochsPerHistoricalVector),
+		RandaoMixes:                bytesutil.ConvertToCustomType(make([][32]byte, params.BeaconConfig().SlotsPerHistoricalRoot)),
 		CurrentEpochAttestations:   atts,
 		FinalizedCheckpoint:        &ethpb.Checkpoint{},
 		JustificationBits:          bitfield.Bitvector4{0x00},

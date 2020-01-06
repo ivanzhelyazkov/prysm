@@ -6,6 +6,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/prysmaticlabs/prysm/shared/bytesutil"
+
 	"github.com/gogo/protobuf/proto"
 	ethpb "github.com/prysmaticlabs/ethereumapis/eth/v1alpha1"
 	"github.com/prysmaticlabs/go-bitfield"
@@ -43,7 +45,7 @@ func TestUnslashedAttestingIndices_CanSortAndFilter(t *testing.T) {
 	}
 	state := &pb.BeaconState{
 		Validators:  validators,
-		RandaoMixes: make([][]byte, params.BeaconConfig().EpochsPerHistoricalVector),
+		RandaoMixes: bytesutil.ConvertToCustomType(make([][32]byte, params.BeaconConfig().EpochsPerHistoricalVector)),
 	}
 
 	indices, err := unslashedAttestingIndices(state, atts)
@@ -91,7 +93,7 @@ func TestUnslashedAttestingIndices_DuplicatedAttestations(t *testing.T) {
 	}
 	state := &pb.BeaconState{
 		Validators:  validators,
-		RandaoMixes: make([][]byte, params.BeaconConfig().EpochsPerHistoricalVector),
+		RandaoMixes: bytesutil.ConvertToCustomType(make([][32]byte, params.BeaconConfig().EpochsPerHistoricalVector)),
 	}
 
 	indices, err := unslashedAttestingIndices(state, atts)
@@ -133,10 +135,9 @@ func TestAttestingBalance_CorrectBalance(t *testing.T) {
 	}
 	state := &pb.BeaconState{
 		Slot:        2,
-		RandaoMixes: make([][]byte, params.BeaconConfig().EpochsPerHistoricalVector),
-
-		Validators: validators,
-		Balances:   balances,
+		RandaoMixes: bytesutil.ConvertToCustomType(make([][32]byte, params.BeaconConfig().EpochsPerHistoricalVector)),
+		Validators:  validators,
+		Balances:    balances,
 	}
 
 	balance, err := AttestingBalance(state, atts)
@@ -173,16 +174,16 @@ func TestMatchAttestations_PrevEpoch(t *testing.T) {
 		{Data: &ethpb.AttestationData{Source: &ethpb.Checkpoint{}, BeaconBlockRoot: []byte{2}, Target: &ethpb.Checkpoint{Root: []byte{1}}}}, // none
 	}
 
-	blockRoots := make([][]byte, 128)
+	blockRoots := make([][32]byte, 128)
 	for i := 0; i < len(blockRoots); i++ {
-		blockRoots[i] = []byte{byte(i + 1)}
+		blockRoots[i] = [32]byte{byte(i + 1)}
 	}
 	state := &pb.BeaconState{
 		Slot:                      s + e + 2,
 		CurrentEpochAttestations:  currentAtts,
 		PreviousEpochAttestations: prevAtts,
-		BlockRoots:                blockRoots,
-		RandaoMixes:               make([][]byte, params.BeaconConfig().EpochsPerHistoricalVector),
+		BlockRoots:                bytesutil.ConvertToCustomType(blockRoots),
+		RandaoMixes:               bytesutil.ConvertToCustomType(make([][32]byte, params.BeaconConfig().EpochsPerHistoricalVector)),
 	}
 
 	mAtts, err := MatchAttestations(state, 0)
@@ -247,15 +248,15 @@ func TestMatchAttestations_CurrentEpoch(t *testing.T) {
 		{Data: &ethpb.AttestationData{Slot: 33, Source: &ethpb.Checkpoint{}, BeaconBlockRoot: []byte{34}, Target: &ethpb.Checkpoint{Root: []byte{68}}}}, // source, head
 	}
 
-	blockRoots := make([][]byte, 128)
+	blockRoots := make([][32]byte, 128)
 	for i := 0; i < len(blockRoots); i++ {
-		blockRoots[i] = []byte{byte(i + 1)}
+		blockRoots[i] = [32]byte{byte(i + 1)}
 	}
 	state := &pb.BeaconState{
 		Slot:                      s + e + 2,
 		CurrentEpochAttestations:  currentAtts,
 		PreviousEpochAttestations: prevAtts,
-		BlockRoots:                blockRoots,
+		BlockRoots:                bytesutil.ConvertToCustomType(blockRoots),
 	}
 
 	mAtts, err := MatchAttestations(state, 1)
@@ -436,7 +437,7 @@ func TestProcessFinalUpdates_CanProcess(t *testing.T) {
 	s.Eth1DataVotes = []*ethpb.Eth1Data{}
 	s.Balances[0] = 29 * 1e9
 	s.Slashings[ce] = 0
-	s.RandaoMixes[ce] = []byte{'A'}
+	s.RandaoMixes[ce] = [32]byte{'A'}
 	newS, err := ProcessFinalUpdates(s)
 	if err != nil {
 		t.Fatal(err)
@@ -455,7 +456,7 @@ func TestProcessFinalUpdates_CanProcess(t *testing.T) {
 	}
 
 	// Verify randao is correctly updated in the right position.
-	if bytes.Equal(newS.RandaoMixes[ne], params.BeaconConfig().ZeroHash[:]) {
+	if bytes.Equal(newS.RandaoMixes[ne][:], params.BeaconConfig().ZeroHash[:]) {
 		t.Error("latest RANDAO still zero hashes")
 	}
 
@@ -642,9 +643,9 @@ func buildState(slot uint64, validatorCount uint64) *pb.BeaconState {
 		Slot:                        slot,
 		Balances:                    validatorBalances,
 		Validators:                  validators,
-		RandaoMixes:                 make([][]byte, params.BeaconConfig().EpochsPerHistoricalVector),
+		RandaoMixes:                 bytesutil.ConvertToCustomType(make([][32]byte, params.BeaconConfig().EpochsPerHistoricalVector)),
 		Slashings:                   make([]uint64, params.BeaconConfig().EpochsPerSlashingsVector),
-		BlockRoots:                  make([][]byte, params.BeaconConfig().SlotsPerEpoch*10),
+		BlockRoots:                  bytesutil.ConvertToCustomType(make([][32]byte, params.BeaconConfig().SlotsPerEpoch*10)),
 		FinalizedCheckpoint:         &ethpb.Checkpoint{},
 		PreviousJustifiedCheckpoint: &ethpb.Checkpoint{},
 		CurrentJustifiedCheckpoint:  &ethpb.Checkpoint{},
