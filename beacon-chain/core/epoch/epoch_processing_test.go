@@ -45,7 +45,7 @@ func TestUnslashedAttestingIndices_CanSortAndFilter(t *testing.T) {
 	}
 	state := &pb.BeaconState{
 		Validators:  validators,
-		RandaoMixes: bytesutil.ConvertToCustomType(make([][32]byte, params.BeaconConfig().EpochsPerHistoricalVector)),
+		RandaoMixes: make([]bytesutil.Bytes32Array, params.BeaconConfig().EpochsPerHistoricalVector),
 	}
 
 	indices, err := unslashedAttestingIndices(state, atts)
@@ -93,7 +93,7 @@ func TestUnslashedAttestingIndices_DuplicatedAttestations(t *testing.T) {
 	}
 	state := &pb.BeaconState{
 		Validators:  validators,
-		RandaoMixes: bytesutil.ConvertToCustomType(make([][32]byte, params.BeaconConfig().EpochsPerHistoricalVector)),
+		RandaoMixes: make([]bytesutil.Bytes32Array, params.BeaconConfig().EpochsPerHistoricalVector),
 	}
 
 	indices, err := unslashedAttestingIndices(state, atts)
@@ -135,7 +135,7 @@ func TestAttestingBalance_CorrectBalance(t *testing.T) {
 	}
 	state := &pb.BeaconState{
 		Slot:        2,
-		RandaoMixes: bytesutil.ConvertToCustomType(make([][32]byte, params.BeaconConfig().EpochsPerHistoricalVector)),
+		RandaoMixes: make([]bytesutil.Bytes32Array, params.BeaconConfig().EpochsPerHistoricalVector),
 		Validators:  validators,
 		Balances:    balances,
 	}
@@ -174,7 +174,7 @@ func TestMatchAttestations_PrevEpoch(t *testing.T) {
 		{Data: &ethpb.AttestationData{Source: &ethpb.Checkpoint{}, BeaconBlockRoot: []byte{2}, Target: &ethpb.Checkpoint{Root: []byte{1}}}}, // none
 	}
 
-	blockRoots := make([][32]byte, 128)
+	blockRoots := make([]bytesutil.Bytes32Array, 128)
 	for i := 0; i < len(blockRoots); i++ {
 		blockRoots[i] = [32]byte{byte(i + 1)}
 	}
@@ -182,8 +182,8 @@ func TestMatchAttestations_PrevEpoch(t *testing.T) {
 		Slot:                      s + e + 2,
 		CurrentEpochAttestations:  currentAtts,
 		PreviousEpochAttestations: prevAtts,
-		BlockRoots:                bytesutil.ConvertToCustomType(blockRoots),
-		RandaoMixes:               bytesutil.ConvertToCustomType(make([][32]byte, params.BeaconConfig().EpochsPerHistoricalVector)),
+		BlockRoots:                blockRoots,
+		RandaoMixes:               make([]bytesutil.Bytes32Array, params.BeaconConfig().EpochsPerHistoricalVector),
 	}
 
 	mAtts, err := MatchAttestations(state, 0)
@@ -248,7 +248,7 @@ func TestMatchAttestations_CurrentEpoch(t *testing.T) {
 		{Data: &ethpb.AttestationData{Slot: 33, Source: &ethpb.Checkpoint{}, BeaconBlockRoot: []byte{34}, Target: &ethpb.Checkpoint{Root: []byte{68}}}}, // source, head
 	}
 
-	blockRoots := make([][32]byte, 128)
+	blockRoots := make([]bytesutil.Bytes32Array, 128)
 	for i := 0; i < len(blockRoots); i++ {
 		blockRoots[i] = [32]byte{byte(i + 1)}
 	}
@@ -256,7 +256,7 @@ func TestMatchAttestations_CurrentEpoch(t *testing.T) {
 		Slot:                      s + e + 2,
 		CurrentEpochAttestations:  currentAtts,
 		PreviousEpochAttestations: prevAtts,
-		BlockRoots:                bytesutil.ConvertToCustomType(blockRoots),
+		BlockRoots:                blockRoots,
 	}
 
 	mAtts, err := MatchAttestations(state, 1)
@@ -643,9 +643,9 @@ func buildState(slot uint64, validatorCount uint64) *pb.BeaconState {
 		Slot:                        slot,
 		Balances:                    validatorBalances,
 		Validators:                  validators,
-		RandaoMixes:                 bytesutil.ConvertToCustomType(make([][32]byte, params.BeaconConfig().EpochsPerHistoricalVector)),
+		RandaoMixes:                 make([]bytesutil.Bytes32Array, params.BeaconConfig().EpochsPerHistoricalVector),
 		Slashings:                   make([]uint64, params.BeaconConfig().EpochsPerSlashingsVector),
-		BlockRoots:                  bytesutil.ConvertToCustomType(make([][32]byte, params.BeaconConfig().SlotsPerEpoch*10)),
+		BlockRoots:                  make([]bytesutil.Bytes32Array, params.BeaconConfig().SlotsPerEpoch*10),
 		FinalizedCheckpoint:         &ethpb.Checkpoint{},
 		PreviousJustifiedCheckpoint: &ethpb.Checkpoint{},
 		CurrentJustifiedCheckpoint:  &ethpb.Checkpoint{},

@@ -28,7 +28,7 @@ func TestComputeValidatorParticipation_PreviousEpoch(t *testing.T) {
 		balances[i] = params.BeaconConfig().MaxEffectiveBalance
 	}
 
-	blockRoots := make([][32]byte, 256)
+	blockRoots := make([]bytesutil.Bytes32Array, 256)
 	for i := 0; i < len(blockRoots); i++ {
 		slot := bytesutil.Bytes32(uint64(i))
 		blockRoots[i] = bytesutil.ToBytes32(slot)
@@ -65,9 +65,9 @@ func TestComputeValidatorParticipation_PreviousEpoch(t *testing.T) {
 		Slot:                        e*params.BeaconConfig().SlotsPerEpoch + 1,
 		Validators:                  validators,
 		Balances:                    balances,
-		BlockRoots:                  bytesutil.ConvertToCustomType(blockRoots),
+		BlockRoots:                  blockRoots,
 		Slashings:                   []uint64{0, 1e9, 1e9},
-		RandaoMixes:                 bytesutil.ConvertToCustomType(make([][32]byte, params.BeaconConfig().SlotsPerHistoricalRoot)),
+		RandaoMixes:                 make([]bytesutil.Bytes32Array, params.BeaconConfig().SlotsPerHistoricalRoot),
 		PreviousEpochAttestations:   atts,
 		FinalizedCheckpoint:         &ethpb.Checkpoint{},
 		JustificationBits:           bitfield.Bitvector4{0x00},
@@ -107,7 +107,7 @@ func TestComputeValidatorParticipation_CurrentEpoch(t *testing.T) {
 	}
 
 	slot := e*params.BeaconConfig().SlotsPerEpoch + 4
-	blockRoots := make([][32]byte, 256)
+	blockRoots := make([]bytesutil.Bytes32Array, 256)
 	for i := 0; i < len(blockRoots); i++ {
 		slot := bytesutil.Bytes32(uint64(i))
 		blockRoots[i] = bytesutil.ToBytes32(slot)
@@ -140,9 +140,9 @@ func TestComputeValidatorParticipation_CurrentEpoch(t *testing.T) {
 		Slot:                       slot,
 		Validators:                 validators,
 		Balances:                   balances,
-		BlockRoots:                 bytesutil.ConvertToCustomType(blockRoots),
+		BlockRoots:                 blockRoots,
 		Slashings:                  []uint64{0, 1e9, 1e9},
-		RandaoMixes:                bytesutil.ConvertToCustomType(make([][32]byte, params.BeaconConfig().SlotsPerHistoricalRoot)),
+		RandaoMixes:                make([]bytesutil.Bytes32Array, params.BeaconConfig().SlotsPerHistoricalRoot),
 		CurrentEpochAttestations:   atts,
 		FinalizedCheckpoint:        &ethpb.Checkpoint{},
 		JustificationBits:          bitfield.Bitvector4{0x00},
