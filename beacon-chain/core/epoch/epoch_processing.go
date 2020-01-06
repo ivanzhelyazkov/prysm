@@ -90,14 +90,14 @@ func MatchAttestations(state *pb.BeaconState, epoch uint64) (*MatchedAttestation
 	for _, srcAtt := range srcAtts {
 		// If the target root matches attestation's target root,
 		// then we know this attestation has correctly voted for target.
-		if bytes.Equal(srcAtt.Data.Target.Root, targetRoot) {
+		if bytes.Equal(srcAtt.Data.Target.Root, targetRoot[:]) {
 			tgtAtts = append(tgtAtts, srcAtt)
 		}
 		headRoot, err := helpers.BlockRootAtSlot(state, srcAtt.Data.Slot)
 		if err != nil {
 			return nil, errors.Wrapf(err, "could not get block root for slot %d", srcAtt.Data.Slot)
 		}
-		if bytes.Equal(srcAtt.Data.BeaconBlockRoot, headRoot) {
+		if bytes.Equal(srcAtt.Data.BeaconBlockRoot, headRoot[:]) {
 			headAtts = append(headAtts, srcAtt)
 		}
 	}
@@ -337,7 +337,7 @@ func ProcessFinalUpdates(state *pb.BeaconState) (*pb.BeaconState, error) {
 		if err != nil {
 			return nil, errors.Wrap(err, "could not hash historical batch")
 		}
-		state.HistoricalRoots = append(state.HistoricalRoots, batchRoot[:])
+		state.HistoricalRoots = append(state.HistoricalRoots, batchRoot)
 	}
 
 	// Rotate current and previous epoch attestations.
